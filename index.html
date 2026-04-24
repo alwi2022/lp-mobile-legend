@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SATRIA TOURNAMENT</title>
+    <meta
+      name="description"
+      content="Website turnamen Mobile Legends Satria Tournament dengan pendaftaran tim, jadwal pertandingan, status turnamen, bracket playoff, daftar tim, dan live stream."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Teko:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="#home">
+          <span class="brand-mark">ST</span>
+          <span class="brand-text">Satria Tournament</span>
+        </a>
+
+        <button
+          class="nav-toggle"
+          id="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="site-nav"
+        >
+          Menu
+        </button>
+
+        <nav class="site-nav" id="site-nav">
+          <a href="#register">Daftar</a>
+          <a href="#schedule">Jadwal</a>
+          <a href="#status">Status</a>
+          <a href="#bracket">Bracket</a>
+          <a href="#teams">Tim</a>
+          <a href="#live">Live</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="home">
+      <section class="hero shell">
+        <div class="hero-copy">
+          <p class="eyebrow">Turnamen Mobile Legends</p>
+          <h1>Satria Tournament</h1>
+          <p class="hero-copy-text">
+            Versi website yang lebih rapi dan simpel untuk sistem single
+            elimination. Tim yang kalah langsung tereliminasi, dan tim yang
+            terus menang akan maju sampai grand final lalu jadi juara.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#register">Daftar Tim</a>
+            <a class="button button-secondary" href="#bracket">Lihat Bracket</a>
+          </div>
+        </div>
+
+        <div class="hero-summary" style="margin-top: 2rem;">
+          <table class="simple-table compact-table">
+            <tbody>
+              <tr>
+                <th>Next Match</th>
+                <td id="hero-next-match">Geek Fam vs RRQ Hoshi</td>
+              </tr>
+              <tr>
+                <th>Jadwal</th>
+                <td id="hero-next-date">24 April 2026, 15.15 WIB</td>
+              </tr>
+              <tr>
+                <th>Format</th>
+                <td>Single Elimination BO3</td>
+              </tr>
+
+              <tr>
+                <th>Slot Tim</th>
+                <td>
+                  <span id="slot-total">16</span> slot / sisa
+                  <span id="slot-remaining">8</span> slot
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section shell" id="register">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Pendaftaran Tim</p>
+            <h2>Pendaftaran tim dipusatkan lewat Google Form</h2>
+          </div>
+          <p class="section-copy">
+            Halaman ini tetap jadi pusat info turnamen, sementara form
+            pendaftarannya diarahkan ke Google Form resmi supaya data langsung
+            masuk ke panitia.
+          </p>
+        </div>
+
+        <div class="register-layout">
+          <div class="register-side">
+            <div class="table-wrap">
+              <table class="simple-table compact-table">
+                <tbody>
+                  <tr>
+                    <th>Check-in Tim</th>
+                    <td>23 April 2026</td>
+                  </tr>
+                  <tr>
+                    <th>Technical Meeting</th>
+                    <td>23 April 2026, 19.00 WIB</td>
+                  </tr>
+                  <tr>
+                    <th>Kickoff Match</th>
+                    <td>24 April 2026</td>
+                  </tr>
+                  <tr>
+                    <th>Status Slot</th>
+                    <td><span id="slot-summary">Masih tersedia</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="register-note">
+              <h3>Info Pendaftaran</h3>
+              <ul class="register-note-list">
+                <li>
+                  Setiap tim minimal menyiapkan 5 pemain inti dan 1 cadangan.
+                </li>
+                <li>
+                  Kapten tim wajib aktif di WhatsApp untuk koordinasi jadwal dan
+                  briefing.
+                </li>
+                <li>
+                  Format pertandingan menggunakan sistem single elimination BO3.
+                </li>
+                <li>
+                  Tim yang terlambat check-in lebih dari 15 menit bisa
+                  dinyatakan WO.
+                </li>
+                <li>
+                  Setelah isi Google Form, tim akan masuk antrean verifikasi
+                  panitia.
+                </li>
+              </ul>
+
+              <div class="register-contact">
+                <span class="register-contact-label">Kontak Panitia</span>
+                <strong>Admin Turnamen: 08xx-xxxx-xxxx</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="register-cta">
+            <div class="register-cta-panel">
+              <div class="register-cta-head">
+                <div class="register-cta-intro">
+                  <p class="register-cta-label">Google Form</p>
+                  <h3>Daftar via Form Resmi</h3>
+                  <p class="register-cta-copy">
+                    Pendaftaran tim dipusatkan ke Google Form supaya data
+                    langsung masuk ke panitia dan lebih mudah dicek.
+                  </p>
+                </div>
+              </div>
+
+              <div class="register-cta-grid">
+                <div class="register-cta-item">
+                  <span>Metode</span>
+                  <strong>Google Form Resmi</strong>
+                </div>
+                <div class="register-cta-item">
+                  <span>Durasi Isi</span>
+                  <strong>1-2 Menit</strong>
+                </div>
+                <div class="register-cta-item">
+                  <span>Akses</span>
+                  <strong>Terbuka di Tab Baru</strong>
+                </div>
+                <div class="register-cta-item">
+                  <span>Status</span>
+                  <strong>Menunggu Verifikasi</strong>
+                </div>
+              </div>
+
+              <div class="register-cta-footer">
+                <a
+                  class="button button-secondary"
+                  href="https://forms.gle/7nkTD2uVD6oMSDLY6"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  Daftar Sekarang
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section shell" id="schedule">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Jadwal Pertandingan</p>
+            <h2>Jadwal pertandingan per pekan dan ronde knockout</h2>
+          </div>
+          <div class="schedule-controls">
+            <label class="filter-field">
+              Filter Pekan / Event
+              <select id="event-filter" aria-label="Filter jadwal berdasarkan pekan atau event">
+                <option value="all">Semua pekan</option>
+              </select>
+            </label>
+            <label class="filter-field">
+              Status Match
+              <select id="status-filter" aria-label="Filter jadwal berdasarkan status match">
+                <option value="all">Semua status</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="simple-table">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Match</th>
+                <th>Round</th>
+                <th>Venue</th>
+                <th>Score</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="schedule-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section shell" id="status">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Status Turnamen</p>
+            <h2>Sistem knockout tanpa lower bracket</h2>
+          </div>
+          <p class="section-copy">
+            Alurnya langsung 8 tim ke quarter final, lalu 4 tim ke semi final, 2
+            tim ke grand final, dan yang menang di final jadi juara.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="simple-table">
+            <thead>
+              <tr>
+                <th>Tim</th>
+                <th>Posisi</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="standings-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section shell" id="bracket">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Playoff Bracket</p>
+            <h2>Bracket playoff versi preview</h2>
+          </div>
+          <p class="section-copy">
+            Preview bracket saya tampilkan dalam ukuran lebih kecil supaya tetap
+            rapi di landing page, tapi bentuk dan garisnya tetap sama seperti
+            halaman bracket penuh.
+          </p>
+        </div>
+
+        <div class="showcase-bracket-wrap">
+          <div class="showcase-preview-shell">
+            <div class="showcase-preview-scale">
+              <div class="showcase-bracket">
+                <div class="showcase-stage">
+                  <div class="showcase-title-block">
+                    <h3>Tournament<br />Bracket</h3>
+                    <div class="showcase-title-accent"></div>
+                  </div>
+
+                <div class="showcase-team-card" style="left: 40px; top: 54px">
+                  <span>DRX</span>
+                </div>
+                <div class="showcase-team-card" style="left: 40px; top: 164px">
+                  <span>EVOS Glory</span>
+                </div>
+                <div class="showcase-team-card" style="left: 40px; top: 348px">
+                  <span>KIRANA FC</span>
+                </div>
+                <div class="showcase-team-card" style="left: 40px; top: 458px">
+                  <span>ONIC Esports</span>
+                </div>
+                <div class="showcase-team-card" style="left: 40px; top: 642px">
+                  <span>Alter Ego</span>
+                </div>
+                <div class="showcase-team-card" style="left: 40px; top: 752px">
+                  <span>RRQ Hoshi</span>
+                </div>
+                <div class="showcase-team-card" style="left: 40px; top: 936px">
+                  <span>Bigetron Alpha</span>
+                </div>
+                <div class="showcase-team-card" style="left: 40px; top: 1046px">
+                  <span>Dewa United</span>
+                </div>
+
+                <div
+                  class="showcase-team-card winner"
+                  style="left: 470px; top: 109px"
+                >
+                  <span>EVOS Glory</span>
+                </div>
+                <div
+                  class="showcase-team-card winner"
+                  style="left: 470px; top: 403px"
+                >
+                  <span>ONIC Esports</span>
+                </div>
+                <div
+                  class="showcase-team-card winner"
+                  style="left: 470px; top: 697px"
+                >
+                  <span>Alter Ego</span>
+                </div>
+                <div
+                  class="showcase-team-card winner"
+                  style="left: 470px; top: 991px"
+                >
+                  <span>Dewa United</span>
+                </div>
+
+                <div class="showcase-team-card" style="left: 900px; top: 256px">
+                  <span>ONIC Esports</span>
+                </div>
+                <div class="showcase-team-card" style="left: 900px; top: 844px">
+                  <span>Dewa United</span>
+                </div>
+
+                <div
+                  class="showcase-team-card champion"
+                  style="left: 1325px; top: 550px"
+                >
+                  <span>ONIC Esports</span>
+                </div>
+
+                <div
+                  class="showcase-connector-box"
+                  style="left: 330px; top: 91px; width: 42px; height: 110px"
+                ></div>
+                <div
+                  class="showcase-connector-mid"
+                  style="left: 372px; top: 146px; width: 98px"
+                ></div>
+
+                <div
+                  class="showcase-connector-box"
+                  style="left: 330px; top: 385px; width: 42px; height: 110px"
+                ></div>
+                <div
+                  class="showcase-connector-mid"
+                  style="left: 372px; top: 440px; width: 98px"
+                ></div>
+
+                <div
+                  class="showcase-connector-box"
+                  style="left: 330px; top: 679px; width: 42px; height: 110px"
+                ></div>
+                <div
+                  class="showcase-connector-mid"
+                  style="left: 372px; top: 734px; width: 98px"
+                ></div>
+
+                <div
+                  class="showcase-connector-box"
+                  style="left: 330px; top: 973px; width: 42px; height: 110px"
+                ></div>
+                <div
+                  class="showcase-connector-mid"
+                  style="left: 372px; top: 1028px; width: 98px"
+                ></div>
+
+                <div
+                  class="showcase-connector-box"
+                  style="left: 760px; top: 146px; width: 46px; height: 294px"
+                ></div>
+                <div
+                  class="showcase-connector-mid"
+                  style="left: 806px; top: 293px; width: 94px"
+                ></div>
+
+                <div
+                  class="showcase-connector-box"
+                  style="left: 760px; top: 734px; width: 46px; height: 294px"
+                ></div>
+                <div
+                  class="showcase-connector-mid"
+                  style="left: 806px; top: 881px; width: 94px"
+                ></div>
+
+                <div
+                  class="showcase-connector-box"
+                  style="left: 1190px; top: 293px; width: 48px; height: 588px"
+                ></div>
+                <div
+                  class="showcase-connector-mid"
+                  style="left: 1238px; top: 587px; width: 87px"
+                ></div>
+
+                  <div class="showcase-trophy-wrap" aria-hidden="true">
+                    <svg
+                      class="showcase-trophy"
+                      viewBox="0 0 64 64"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M22 6h20v8h8c0 8.84-4.3 15.02-11 16.89A16.18 16.18 0 0 1 35 39.6V47h9v5H20v-5h9v-7.4a16.18 16.18 0 0 1-4-8.71C18.3 29.02 14 22.84 14 14h8V6Zm24 13.16V19h-4v7.31c2.58-1.2 4-3.55 4-7.15Zm-28-.16c0 3.6 1.42 5.95 4 7.15V19h-4Zm7-8v12c0 7.18 3.54 12 7 12s7-4.82 7-12V11H25Z"
+                      ></path>
+                      <path d="M18 54h28v4H18z"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="showcase-bottom-strip"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section shell" id="teams">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Daftar Tim</p>
+            <h2>Tim utama dan tim yang sudah mendaftar</h2>
+          </div>
+          <p class="section-copy">
+            Tabel kiri berisi tim inti. Tabel kanan bisa dipakai untuk
+            menampilkan tim yang sudah dikonfirmasi panitia setelah mengisi
+            Google Form.
+          </p>
+        </div>
+
+        <div class="two-tables">
+          <div class="table-wrap">
+            <table class="simple-table">
+              <thead>
+                <tr>
+                  <th>Tim</th>
+                  <th>Kapten</th>
+                  <th>Region</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="core-team-body"></tbody>
+            </table>
+          </div>
+
+          <div class="table-wrap">
+            <table class="simple-table">
+              <thead>
+                <tr>
+                  <th>Tim</th>
+                  <th>Kapten</th>
+                  <th>Region</th>
+                  <th>Kontak</th>
+                </tr>
+              </thead>
+              <tbody id="registration-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section shell" id="live">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Live Stream</p>
+            <h2>Video utama dan daftar match live</h2>
+          </div>
+          <p class="section-copy">
+            Pilih match dari daftar di sebelah kanan untuk menampilkan video
+            utama. Nanti tinggal ganti YouTube ID kalau link live resminya
+            sudah ada.
+          </p>
+        </div>
+
+        <div class="live-layout">
+          <article class="live-feature">
+            <div class="live-feature-head">
+              <div class="live-feature-intro">
+                <p class="live-label">Featured Stream</p>
+                <h3 class="live-feature-title" id="featured-stream-title">
+                  Semi Final 1
+                </h3>
+              </div>
+              <span class="status-chip live" id="featured-stream-status"
+                >Live Soon</span
+              >
+            </div>
+
+            <div class="live-feature-meta">
+              <div class="live-meta-item">
+                <span>Jadwal</span>
+                <strong id="featured-stream-date">26 April 2026, 15.15 WIB</strong>
+              </div>
+              <div class="live-meta-item">
+                <span>Match</span>
+                <strong id="featured-stream-match">ONIC Esports vs EVOS Glory</strong>
+              </div>
+            </div>
+
+            <div class="video-shell">
+              <iframe
+                id="featured-stream-frame"
+                src="https://www.youtube.com/embed/M7lc1UVf-VE"
+                title="Featured match stream"
+                loading="lazy"
+                allow="
+                  accelerometer;
+                  autoplay;
+                  clipboard-write;
+                  encrypted-media;
+                  gyroscope;
+                  picture-in-picture;
+                  web-share;
+                "
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+            </div>
+          </article>
+
+          <aside class="live-side">
+            <div class="live-side-head">
+              <p class="live-label">Daftar Match</p>
+              <p class="live-side-copy">
+                Pilih salah satu match di bawah ini untuk mengganti video utama.
+              </p>
+            </div>
+
+            <div class="table-wrap live-table-wrap">
+              <table class="simple-table">
+                <thead>
+                  <tr>
+                    <th>Match</th>
+                    <th>Jadwal</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="live-body"></tbody>
+              </table>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer shell">
+      <p>Satria Tournament</p>
+      <span>Versi simpel untuk landing page turnamen Mobile Legends.</span>
+    </footer>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
