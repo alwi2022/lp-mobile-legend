@@ -5,11 +5,22 @@ import { redirect } from "next/navigation";
 import { getCurrentAdmin } from "../../../lib/auth/admin";
 import { createClient } from "../../../lib/supabase/server";
 
-function buildAdminsRedirect(type, message) {
+function normalizeReturnTo(value, fallback = "/admin/management") {
+  const candidate = String(value || "").trim();
+
+  if (!candidate.startsWith("/admin") || candidate.startsWith("//")) {
+    return fallback;
+  }
+
+  return candidate;
+}
+
+function buildAdminsRedirect(type, message, returnTo = "") {
+  const basePath = normalizeReturnTo(returnTo);
   const params = new URLSearchParams();
   params.set("type", type);
   params.set("message", message);
-  return `/admin/admins?${params.toString()}`;
+  return `${basePath}?${params.toString()}`;
 }
 
 function readText(formData, key, fallback = "") {
@@ -38,6 +49,7 @@ function ensureSuperAdmin(state) {
 function getContext(formData) {
   return {
     adminId: readText(formData, "admin_id"),
+    returnTo: readText(formData, "return_to"),
     payload: {
       user_id: readText(formData, "user_id"),
       full_name: readText(formData, "full_name"),
@@ -67,18 +79,19 @@ function validatePayload(payload) {
 
 function revalidateAdminPaths() {
   revalidatePath("/admin");
-  revalidatePath("/admin/admins");
+  revalidatePath("/admin/management");
+  revalidatePath("/admin/management/new");
 }
 
 export async function createAdminAction(formData) {
   const state = await getCurrentAdmin();
   ensureSuperAdmin(state);
 
-  const { payload } = getContext(formData);
+  const { payload, returnTo } = getContext(formData);
   const validationError = validatePayload(payload);
 
   if (validationError) {
-    redirect(buildAdminsRedirect("error", validationError));
+    redirect(buildAdminsRedirect("error", validationError, returnTo));
   }
 
   const supabase = await createClient();
@@ -89,27 +102,27 @@ export async function createAdminAction(formData) {
   });
 
   if (error) {
-    redirect(buildAdminsRedirect("error", error.message));
+    redirect(buildAdminsRedirect("error", error.message, returnTo));
   }
 
   revalidateAdminPaths();
-  redirect(buildAdminsRedirect("success", "Admin berhasil dibuat."));
+  redirect(buildAdminsRedirect("success", "Admin berhasil dibuat.", "/admin/management"));
 }
 
 export async function updateAdminAction(formData) {
   const state = await getCurrentAdmin();
   ensureSuperAdmin(state);
 
-  const { adminId, payload } = getContext(formData);
+  const { adminId, payload, returnTo } = getContext(formData);
 
   if (!adminId) {
-    redirect(buildAdminsRedirect("error", "Context admin tidak valid."));
+    redirect(buildAdminsRedirect("error", "Context admin tidak valid.", returnTo));
   }
 
   const validationError = validatePayload(payload);
 
   if (validationError) {
-    redirect(buildAdminsRedirect("error", validationError));
+    redirect(buildAdminsRedirect("error", validationError, returnTo));
   }
 
   const supabase = await createClient();
@@ -122,11 +135,12 @@ export async function updateAdminAction(formData) {
     .eq("id", adminId);
 
   if (error) {
-    redirect(buildAdminsRedirect("error", error.message));
+    redirect(buildAdminsRedirect("error", error.message, returnTo));
   }
 
   revalidateAdminPaths();
-  redirect(buildAdminsRedirect("success", "Admin berhasil diperbarui."));
+  revalidatePath(`/admin/management/${adminId}`);
+  redirect(buildAdminsRedirect("success", "Admin berhasil diperbarui.", returnTo));
 }
 
 export async function deleteAdminAction(formData) {
@@ -134,18 +148,20 @@ export async function deleteAdminAction(formData) {
   ensureSuperAdmin(state);
 
   const adminId = readText(formData, "admin_id");
+  const returnTo = readText(formData, "return_to");
 
   if (!adminId) {
-    redirect(buildAdminsRedirect("error", "Context admin tidak valid."));
+    redirect(buildAdminsRedirect("error", "Context admin tidak valid.", returnTo));
   }
 
   const supabase = await createClient();
   const { error } = await supabase.from("admins").delete().eq("id", adminId);
 
   if (error) {
-    redirect(buildAdminsRedirect("error", error.message));
+    redirect(buildAdminsRedirect("error", error.message, returnTo));
   }
 
   revalidateAdminPaths();
-  redirect(buildAdminsRedirect("success", "Admin berhasil dihapus."));
+  revalidatePath(`/admin/management/${adminId}`);
+  redirect(buildAdminsRedirect("success", "Admin berhasil dihapus.", returnTo));
 }

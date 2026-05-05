@@ -5,6 +5,7 @@ import {
   AdminSection,
   AdminStatusBadge,
 } from "../../../components/admin/admin-shell";
+import { AdminListFilterControls } from "../../../components/admin/list-filter-controls";
 import {
   getAdminRegistrationsPageData,
   REGISTRATION_FILTERS,
@@ -28,21 +29,6 @@ function StatusPill({ value }) {
 function formatDateTime(value) {
   const d = new Date(value);
   return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
-}
-
-function buildFilterHref(status, query) {
-  const params = new URLSearchParams();
-
-  if (status !== "all") {
-    params.set("status", status);
-  }
-
-  if (query) {
-    params.set("q", query);
-  }
-
-  const qs = params.toString();
-  return qs ? `/admin/registrations?${qs}` : "/admin/registrations";
 }
 
 function registrationMatchesSearch(registration, query) {
@@ -85,17 +71,14 @@ export default async function AdminRegistrationsPage({ searchParams }) {
         <div className={styles.stack}>
           <div className={styles.crudHeader}>
             <h1 className={styles.crudTitle}>Pendaftaran</h1>
-            <form action="/admin/registrations" className={styles.crudActions}>
-              {activeFilter !== "all" ? (
-                <input type="hidden" name="status" value={activeFilter} />
-              ) : null}
-              <input
-                className={styles.searchInput}
-                name="q"
-                defaultValue={query}
-                placeholder="Cari tim..."
-              />
-            </form>
+            <AdminListFilterControls
+              basePath="/admin/registrations"
+              filters={REGISTRATION_FILTERS}
+              activeFilter={activeFilter}
+              initialQuery={query}
+              searchPlaceholder="Cari tim..."
+              filterLabel="Filter status pendaftaran"
+            />
           </div>
 
           {!data.tournament ? (
@@ -104,27 +87,6 @@ export default async function AdminRegistrationsPage({ searchParams }) {
               description="Buat turnamen awal dari halaman Pengaturan dulu."
             />
           ) : null}
-
-          <div className={styles.tableToolbar}>
-            <div className={styles.filters}>
-              {REGISTRATION_FILTERS.map((filter) => {
-                return (
-                  <Link
-                    key={filter.value}
-                    href={buildFilterHref(filter.value, query)}
-                    className={[
-                      styles.filterLink,
-                      activeFilter === filter.value ? styles.filterLinkActive : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    {filter.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
 
           {registrations.length ? (
             <div className={styles.tableWrap}>

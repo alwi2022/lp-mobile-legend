@@ -103,6 +103,20 @@ const PAGE_META = [
       "Ubah identitas brand, copy beranda, bagian pendaftaran, siaran, dan footer dari satu panel yang lebih terstruktur.",
   },
   {
+    prefix: "/admin/management/new",
+    eyebrow: "Akses",
+    title: "Tambah Admin",
+    description:
+      "Tambahkan admin baru dengan role dan identitas yang tepat agar akses operasional tetap rapi.",
+  },
+  {
+    prefix: "/admin/management/",
+    eyebrow: "Akses",
+    title: "Edit Admin",
+    description:
+      "Ubah data admin, role, dan status akses dari halaman detail yang lebih fokus.",
+  },
+  {
     prefix: "/admin/management",
     eyebrow: "Akses",
     title: "Akses Admin",

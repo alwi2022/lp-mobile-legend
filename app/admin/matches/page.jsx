@@ -4,6 +4,7 @@ import {
   AdminMessage,
   AdminSection,
 } from "../../../components/admin/admin-shell";
+import { AdminListFilterControls } from "../../../components/admin/list-filter-controls";
 import {
   getAdminMatchesPageData,
   MATCH_FILTERS,
@@ -26,21 +27,6 @@ function formatDateTime(value) {
   }
 
   return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
-}
-
-function buildFilterHref(status, query) {
-  const params = new URLSearchParams();
-
-  if (status !== "all") {
-    params.set("status", status);
-  }
-
-  if (query) {
-    params.set("q", query);
-  }
-
-  const qs = params.toString();
-  return qs ? `/admin/matches?${qs}` : "/admin/matches";
 }
 
 function matchesSearch(match, query) {
@@ -80,17 +66,14 @@ export default async function AdminMatchesPage({ searchParams }) {
           <div className={styles.crudHeader}>
             <h1 className={styles.crudTitle}>Jadwal Pertandingan</h1>
             <div className={styles.crudActions}>
-              <form action="/admin/matches" className={styles.crudActions}>
-                {activeFilter !== "all" ? (
-                  <input type="hidden" name="status" value={activeFilter} />
-                ) : null}
-                <input
-                  className={styles.searchInput}
-                  name="q"
-                  defaultValue={query}
-                  placeholder="Cari match..."
-                />
-              </form>
+              <AdminListFilterControls
+                basePath="/admin/matches"
+                filters={MATCH_FILTERS}
+                activeFilter={activeFilter}
+                initialQuery={query}
+                searchPlaceholder="Cari match..."
+                filterLabel="Filter status pertandingan"
+              />
               <Link href="/admin/matches/new" className={styles.buttonPrimary}>
                 + Buat Match
               </Link>
@@ -111,27 +94,6 @@ export default async function AdminMatchesPage({ searchParams }) {
               }
             />
           ) : null}
-
-          <div className={styles.tableToolbar}>
-            <div className={styles.filters}>
-              {MATCH_FILTERS.map((filter) => {
-                return (
-                  <Link
-                    key={filter.value}
-                    href={buildFilterHref(filter.value, query)}
-                    className={[
-                      styles.filterLink,
-                      activeFilter === filter.value ? styles.filterLinkActive : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    {filter.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
 
           {matches.length ? (
             <div className={styles.tableWrap}>

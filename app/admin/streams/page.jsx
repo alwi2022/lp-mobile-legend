@@ -4,6 +4,7 @@ import {
   AdminMessage,
   AdminSection,
 } from "../../../components/admin/admin-shell";
+import { AdminListFilterControls } from "../../../components/admin/list-filter-controls";
 import {
   getAdminStreamsPageData,
   normalizeStreamFilter,
@@ -17,21 +18,6 @@ export const dynamic = "force-dynamic";
 function formatDateTime(value) {
   const d = new Date(value);
   return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
-}
-
-function buildFilterHref(status, query) {
-  const params = new URLSearchParams();
-
-  if (status !== "all") {
-    params.set("status", status);
-  }
-
-  if (query) {
-    params.set("q", query);
-  }
-
-  const qs = params.toString();
-  return qs ? `/admin/streams?${qs}` : "/admin/streams";
 }
 
 function streamMatchesSearch(stream, query) {
@@ -70,17 +56,14 @@ export default async function AdminStreamsPage({ searchParams }) {
           <div className={styles.crudHeader}>
             <h1 className={styles.crudTitle}>Siaran</h1>
             <div className={styles.crudActions}>
-              <form action="/admin/streams" className={styles.crudActions}>
-                {activeFilter !== "all" ? (
-                  <input type="hidden" name="status" value={activeFilter} />
-                ) : null}
-                <input
-                  className={styles.searchInput}
-                  name="q"
-                  defaultValue={query}
-                  placeholder="Cari siaran..."
-                />
-              </form>
+              <AdminListFilterControls
+                basePath="/admin/streams"
+                filters={STREAM_FILTERS}
+                activeFilter={activeFilter}
+                initialQuery={query}
+                searchPlaceholder="Cari siaran..."
+                filterLabel="Filter status siaran"
+              />
               <Link href="/admin/streams/new" className={styles.buttonPrimary}>
                 + Buat Siaran
               </Link>
@@ -101,29 +84,6 @@ export default async function AdminStreamsPage({ searchParams }) {
               }
             />
           ) : null}
-
-          <div className={styles.tableToolbar}>
-            <div className={styles.filters}>
-              {STREAM_FILTERS.map((filter) => {
-                return (
-                  <Link
-                    key={filter.value}
-                    href={buildFilterHref(filter.value, query)}
-                    className={[
-                      styles.filterLink,
-                      activeFilter === filter.value
-                        ? styles.filterLinkActive
-                        : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    {filter.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
 
           {streams.length ? (
             <div className={styles.tableWrap}>
@@ -157,9 +117,7 @@ export default async function AdminStreamsPage({ searchParams }) {
                         <p className={styles.tableTitle}>
                           {formatDateTime(stream.scheduled_start_at)}
                         </p>
-                        <p className={styles.tableSubtle}>
-                          Mulai {formatDateTime(stream.started_at)}
-                        </p>
+                      
                       </td>
                       <td>{stream.is_featured ? "Ya" : "-"}</td>
                       <td>
