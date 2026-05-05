@@ -2,7 +2,6 @@ import {
   AdminEmptyState,
   AdminMessage,
   AdminSection,
-  AdminStatCard,
   AdminStatusBadge,
 } from "../../../components/admin/admin-shell";
 import { getAdminAdminsPageData, ADMIN_ROLE_OPTIONS } from "../../../lib/admin/admins";
@@ -95,75 +94,48 @@ function AdminFormFields({ admin = null }) {
   );
 }
 
+function adminMatchesSearch(admin, query) {
+  if (!query) {
+    return true;
+  }
+
+  const haystack = [admin.full_name, admin.role, admin.phone]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query.toLowerCase());
+}
+
 export default async function AdminAdminsPage({ searchParams }) {
   const params = await searchParams;
   const type = typeof params?.type === "string" ? params.type : "";
   const message = typeof params?.message === "string" ? params.message : "";
+  const query = typeof params?.q === "string" ? params.q.trim() : "";
   const data = await getAdminAdminsPageData();
   const canManage = data.currentAdmin?.role === "super_admin";
+  const admins = data.admins.filter((admin) => adminMatchesSearch(admin, query));
 
   return (
     <>
       <AdminMessage type={type} message={message || data.error} />
 
-      <AdminSection
-        title="Ringkasan Admin"
-        description="Pengelolaan akses dibuat sesederhana mungkin: lihat ringkasan peran, lalu tambah atau edit admin hanya saat perlu."
-      >
-        {data.summary ? (
-          <div className={styles.metaGrid}>
-            <AdminStatCard
-              label="Total Admin"
-              value={String(data.summary.total_count)}
-              helper={`Aktif ${data.summary.active_count}`}
+      <AdminSection>
+        <div className={styles.crudHeader}>
+          <h1 className={styles.crudTitle}>Management Admin</h1>
+          <form action="/admin/management" className={styles.crudActions}>
+            <input
+              className={styles.searchInput}
+              name="q"
+              defaultValue={query}
+              placeholder="Cari admin..."
             />
-            <AdminStatCard label="Superadmin" value={String(data.summary.super_admin_count)} />
-            <AdminStatCard label="Admin" value={String(data.summary.admin_count)} />
-            <AdminStatCard
-              label="Operator"
-              value={String(data.summary.operator_count)}
-              helper={`Nonaktif ${data.summary.inactive_count}`}
-            />
-          </div>
-        ) : (
-          <AdminEmptyState
-            title="Belum ada data admin yang bisa ditampilkan"
-            description="Halaman ini akan aktif penuh setelah login dengan peran admin dan kebijakan database aktif."
-          />
-        )}
-      </AdminSection>
-
-      <AdminSection
-        title="Aturan Akses"
-        description="Bagian ini menjelaskan peran sesi kamu saat ini dan apakah kamu boleh mengubah admin lain."
-      >
-        <div className={styles.grid}>
-          <article className={styles.card}>
-            <h4 className={styles.cardTitle}>Sesi Saat Ini</h4>
-            <p className={styles.pageCopy}>
-              {data.currentAdmin
-                ? `${data.currentAdmin.full_name} (${data.currentAdmin.role.replaceAll("_", " ")})`
-                : "Tidak ada admin aktif."}
-            </p>
-          </article>
-
-          <article className={styles.card}>
-            <h4 className={styles.cardTitle}>Izin Pengelolaan</h4>
-            <p className={styles.pageCopy}>
-              {canManage
-                ? "Kamu bisa menambah, mengubah, dan menghapus data admin."
-                : "Halaman ini bisa dibaca, tapi tambah, ubah, dan hapus admin lain dibatasi hanya untuk superadmin."}
-            </p>
-          </article>
+          </form>
         </div>
-      </AdminSection>
 
-      <AdminSection
-        title="Tambah Admin"
-        description="Buat user-nya dulu di Supabase Auth. Setelah itu, petakan user tersebut ke tabel admin dari form ini."
-      >
         {canManage ? (
-          <form action={createAdminAction} className={styles.stack}>
+          <form action={createAdminAction} className={styles.formCard}>
+            <h2 className={styles.formTitle}>Tambah Admin</h2>
             <AdminFormFields />
             <div className={styles.buttonRow}>
               <button type="submit" className={styles.buttonPrimary}>
@@ -177,13 +149,8 @@ export default async function AdminAdminsPage({ searchParams }) {
             description="Kalau kamu butuh akun baru untuk panitia, minta superadmin menambahkannya dari halaman ini."
           />
         )}
-      </AdminSection>
 
-      <AdminSection
-        title="Daftar Admin"
-        description="Tabel ini dipakai untuk scan cepat. Form edit diletakkan di bawah dalam accordion supaya halaman tetap ringan."
-      >
-        {data.admins.length ? (
+        {admins.length ? (
           <div className={styles.stack}>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
@@ -196,7 +163,7 @@ export default async function AdminAdminsPage({ searchParams }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.admins.map((admin) => (
+                  {admins.map((admin) => (
                     <tr key={admin.id}>
                       <td>
                         <p className={styles.tableTitle}>{admin.full_name}</p>
@@ -219,7 +186,7 @@ export default async function AdminAdminsPage({ searchParams }) {
 
             {canManage ? (
               <div className={styles.stack}>
-                {data.admins.map((admin) => (
+                {admins.map((admin) => (
                   <details key={admin.id} className={styles.accordion}>
                     <summary className={styles.accordionSummary}>
                       <span>Kelola {admin.full_name}</span>
@@ -251,7 +218,7 @@ export default async function AdminAdminsPage({ searchParams }) {
         ) : (
           <AdminEmptyState
             title="Belum ada baris admin yang terlihat"
-            description="Kalau kamu login sebagai non-superadmin, kebijakan bisa membatasi akses hanya ke profil admin milikmu sendiri."
+            description="Hapus pencarian atau cek akses akun yang sedang login."
           />
         )}
       </AdminSection>

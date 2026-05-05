@@ -2,8 +2,6 @@
 import {
   AdminEmptyState,
   AdminMessage,
-  AdminSection,
-  AdminStatCard,
 } from "../../../components/admin/admin-shell";
 import { getAdminSettingsPageData } from "../../../lib/admin/site-settings";
 import { createStarterTournamentAction, saveSiteSettingsAction } from "./actions";
@@ -17,35 +15,9 @@ function SettingGroup({ id, title, location, description, children }) {
     <section id={id} className={styles.formGroup}>
       <div className={styles.formGroupHeader}>
         <h4 className={styles.formGroupTitle}>{title}</h4>
-        {location ? <span className={styles.detailLabel}>{location}</span> : null}
-        <p className={styles.formGroupCopy}>{description}</p>
       </div>
       <div className={styles.formGrid}>{children}</div>
     </section>
-  );
-}
-
-function formatTournamentStatus(value = "") {
-  return (
-    {
-      draft: "Draf",
-      registration_open: "Pendaftaran Dibuka",
-      registration_closed: "Pendaftaran Ditutup",
-      ongoing: "Berlangsung",
-      completed: "Selesai",
-      archived: "Diarsipkan",
-    }[value] || value.replaceAll("_", " ")
-  );
-}
-
-function formatTournamentFormat(value = "") {
-  return (
-    {
-      single_elimination: "Single Elimination",
-      double_elimination: "Double Elimination",
-      round_robin: "Round Robin",
-      hybrid: "Hybrid",
-    }[value] || value.replaceAll("_", " ")
   );
 }
 
@@ -89,63 +61,20 @@ export default async function AdminSettingsPage({ searchParams }) {
 
   return (
     <>
+      <div className={styles.formHeader}>
+        <h1 className={styles.formTitle}>Website</h1>
+        {data.tournament ? (
+          <button type="submit" form="site-settings-form" className={styles.buttonPrimary}>
+            Simpan Pengaturan
+          </button>
+        ) : null}
+      </div>
+
       <AdminMessage type={type} message={message || data.error} />
 
-      <AdminSection
-        title="Ringkasan Turnamen Aktif"
-        description="Ringkasan kecil ini membantu kamu memastikan turnamen utama sudah aktif sebelum mengubah konten website."
-      >
-        {data.tournament ? (
-          <div className={styles.metaGrid}>
-            <AdminStatCard
-              label="Turnamen"
-              value={data.tournament.name}
-              helper={data.tournament.slug}
-              compact
-            />
-            <AdminStatCard
-              label="Status"
-              value={formatTournamentStatus(data.tournament.status)}
-              compact
-            />
-            <AdminStatCard
-              label="Format"
-              value={formatTournamentFormat(data.tournament.format)}
-              compact
-            />
-            <AdminStatCard
-              label="Batas Slot"
-              value={String(data.tournament.team_slot_limit)}
-              compact
-            />
-          </div>
-        ) : (
-          <AdminEmptyState
-            title="Belum ada turnamen utama"
-            description={
-              <>
-                Pengaturan website butuh satu baris data di tabel{" "}
-                <span className={styles.code}>tournaments</span>. Kamu bisa membuat turnamen awal
-                langsung dari sini agar alur admin bisa lanjut.
-              </>
-            }
-            action={
-              <form action={createStarterTournamentAction}>
-                <button type="submit" className={styles.buttonPrimary}>
-                  Buat Turnamen Awal
-                </button>
-              </form>
-            }
-          />
-        )}
-      </AdminSection>
-
-      <AdminSection
-        title="Konten Website"
-        description="Pakai tab Pendaftaran untuk tanggal penting dan batas slot. Tab lain hanya untuk teks website publik."
-      >
-        {data.tournament ? (
-          <form action={saveSiteSettingsAction} className={styles.stack}>
+      {data.tournament ? (
+        <form id="site-settings-form" action={saveSiteSettingsAction} className={styles.stack}>
+          <div className={styles.formCard}>
             <input type="hidden" name="tournament_id" value={data.tournament.id} />
             <SettingsTabs tabs={settingTabs} defaultValue="identitas">
               <SettingsTabPanel value="identitas">
@@ -492,20 +421,21 @@ export default async function AdminSettingsPage({ searchParams }) {
                 </SettingGroup>
               </SettingsTabPanel>
             </SettingsTabs>
-
-            <div className={styles.buttonRow}>
+          </div>
+        </form>
+      ) : (
+        <AdminEmptyState
+          title="Belum ada turnamen utama"
+          description="Buat turnamen awal dulu supaya form pengaturan aktif."
+          action={
+            <form action={createStarterTournamentAction}>
               <button type="submit" className={styles.buttonPrimary}>
-                Simpan Pengaturan
+                Buat Turnamen Awal
               </button>
-            </div>
-          </form>
-        ) : (
-          <AdminEmptyState
-            title="Form pengaturan akan aktif setelah turnamen dibuat"
-            description="Begitu turnamen awal tersedia, halaman ini langsung bisa dipakai untuk mengubah konten website publik."
-          />
-        )}
-      </AdminSection>
+            </form>
+          }
+        />
+      )}
     </>
   );
 }

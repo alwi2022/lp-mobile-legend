@@ -3,7 +3,6 @@ import {
   AdminEmptyState,
   AdminMessage,
   AdminSection,
-  AdminStatCard,
   AdminStatusBadge,
 } from "../../../components/admin/admin-shell";
 import {
@@ -31,74 +30,88 @@ function formatDateTime(value) {
   return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
 }
 
+function buildFilterHref(status, query) {
+  const params = new URLSearchParams();
+
+  if (status !== "all") {
+    params.set("status", status);
+  }
+
+  if (query) {
+    params.set("q", query);
+  }
+
+  const qs = params.toString();
+  return qs ? `/admin/registrations?${qs}` : "/admin/registrations";
+}
+
+function registrationMatchesSearch(registration, query) {
+  if (!query) {
+    return true;
+  }
+
+  const haystack = [
+    registration.team_name,
+    registration.team_short_name,
+    registration.captain_name,
+    registration.region,
+    registration.city,
+    registration.status,
+    registration.official_team_name,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query.toLowerCase());
+}
+
 export default async function AdminRegistrationsPage({ searchParams }) {
   const params = await searchParams;
   const type = typeof params?.type === "string" ? params.type : "";
   const message = typeof params?.message === "string" ? params.message : "";
   const activeFilter = normalizeRegistrationFilter(params?.status);
+  const query = typeof params?.q === "string" ? params.q.trim() : "";
   const data = await getAdminRegistrationsPageData(activeFilter);
+  const registrations = data.registrations.filter((registration) =>
+    registrationMatchesSearch(registration, query),
+  );
 
   return (
     <>
       <AdminMessage type={type} message={message || data.error} />
 
-      <AdminSection
-        title="Ringkasan Pendaftaran"
-        description="Gunakan angka ini untuk melihat antrean yang benar-benar perlu direview lebih dulu."
-      >
-        {data.tournament && data.summary ? (
-          <div className={styles.metaGrid}>
-            <AdminStatCard
-              label="Tim Disetujui"
-              value={String(data.summary.approved_team_count)}
-              helper={`Batas slot ${data.summary.team_slot_limit}`}
-            />
-            <AdminStatCard
-              label="Menunggu"
-              value={String(data.summary.pending_registration_count)}
-            />
-            <AdminStatCard
-              label="Daftar Tunggu"
-              value={String(data.summary.waitlisted_registration_count)}
-            />
-            <AdminStatCard
-              label="Sisa Slot"
-              value={String(data.summary.remaining_slots)}
-              helper={`Ditolak ${data.summary.rejected_registration_count}`}
-            />
-          </div>
-        ) : (
-          <AdminEmptyState
-            title="Belum ada turnamen aktif"
-            description={
-              <>
-                Halaman pendaftaran membutuhkan satu baris data di tabel{" "}
-                <span className={styles.code}>tournaments</span>. Kamu bisa membuat turnamen awal
-                dari halaman Pengaturan dulu.
-              </>
-            }
-          />
-        )}
-      </AdminSection>
-
-      <AdminSection
-        title="Daftar Pendaftaran"
-        description="Halaman utama ini dibuat untuk scan dan filter. Buka detail hanya saat kamu perlu cek roster lengkap atau mengambil keputusan."
-
-      >
+      <AdminSection>
         <div className={styles.stack}>
-          <div className={styles.toolbar}>
+          <div className={styles.crudHeader}>
+            <h1 className={styles.crudTitle}>Pendaftaran</h1>
+            <form action="/admin/registrations" className={styles.crudActions}>
+              {activeFilter !== "all" ? (
+                <input type="hidden" name="status" value={activeFilter} />
+              ) : null}
+              <input
+                className={styles.searchInput}
+                name="q"
+                defaultValue={query}
+                placeholder="Cari tim..."
+              />
+            </form>
+          </div>
+
+          {!data.tournament ? (
+            <AdminEmptyState
+              title="Belum ada turnamen aktif"
+              description="Buat turnamen awal dari halaman Pengaturan dulu."
+            />
+          ) : null}
+
+          <div className={styles.tableToolbar}>
             <div className={styles.filters}>
               {REGISTRATION_FILTERS.map((filter) => {
-                const href =
-                  filter.value === "all"
-                    ? "/admin/registrations"
-                    : `/admin/registrations?status=${encodeURIComponent(filter.value)}`;
-
                 return (
                   <Link
                     key={filter.value}
-                    href={href}
+                    href={buildFilterHref(filter.value, query)}
                     className={[
                       styles.filterLink,
                       activeFilter === filter.value ? styles.filterLinkActive : "",
@@ -106,14 +119,14 @@ export default async function AdminRegistrationsPage({ searchParams }) {
                       .filter(Boolean)
                       .join(" ")}
                   >
-                    {filter.label}  
+                    {filter.label}
                   </Link>
                 );
               })}
             </div>
           </div>
 
-          {data.registrations.length ? (
+          {registrations.length ? (
             <div className={styles.tableWrap}>
               <table className={styles.table}>
                 <thead>
@@ -127,7 +140,7 @@ export default async function AdminRegistrationsPage({ searchParams }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.registrations.map((registration) => (
+                  {registrations.map((registration) => (
                     <tr key={registration.id}>
                       <td>
                         <p className={styles.tableTitle}>{registration.team_name}</p>
@@ -171,7 +184,7 @@ export default async function AdminRegistrationsPage({ searchParams }) {
           ) : (
             <AdminEmptyState
               title="Belum ada data untuk filter ini"
-              description="Begitu form publik dihubungkan ke database, kiriman pendaftaran akan muncul di halaman ini."
+              description="Ubah filter, hapus pencarian, atau tunggu pendaftaran baru masuk."
             />
           )}
         </div>

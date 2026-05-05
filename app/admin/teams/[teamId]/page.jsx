@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  AdminDetailCard,
   AdminEmptyState,
   AdminMessage,
   AdminSection,
@@ -19,25 +18,6 @@ import { TeamFormFields, TeamPlayerFormFields } from "../team-form-parts";
 import styles from "../../../../components/admin/admin-shell.module.css";
 
 export const dynamic = "force-dynamic";
-
-function StatusPill({ value }) {
-  const config = {
-    active: { label: "aktif", tone: "success" },
-    eliminated: { label: "tereliminasi", tone: "neutral" },
-    champion: { label: "juara", tone: "accent" },
-    archived: { label: "diarsipkan", tone: "danger" },
-  }[String(value)] || {
-    label: String(value).replaceAll("_", " "),
-    tone: "neutral",
-  };
-
-  return <AdminStatusBadge label={config.label} tone={config.tone} />;
-}
-
-function formatDateTime(value) {
-  const d = new Date(value);
-  return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
-}
 
 function PlayerStatusPill({ player }) {
   return (
@@ -64,109 +44,39 @@ export default async function AdminTeamDetailPage({ params, searchParams }) {
 
   return (
     <>
-      <div className={styles.backRow}>
-        <Link href="/admin/teams" className={styles.backLink}>
-          Kembali ke daftar tim
-        </Link>
+      <div className={styles.formHeader}>
+        <h1 className={styles.formTitle}>Edit Tim</h1>
+        <div className={styles.formActions}>
+          <Link href="/admin/teams" className={styles.filterLink}>
+            Cancel
+          </Link>
+
+          <form action={deleteTeamAction} className={styles.actionForm}>
+            <input type="hidden" name="team_id" value={team.id} />
+            <input type="hidden" name="tournament_id" value={data.tournament.id} />
+            <button type="submit" className={styles.buttonDanger}>
+              Hapus
+            </button>
+          </form>
+
+          <button type="submit" form="team-update-form" className={styles.buttonPrimary}>
+            Simpan Tim
+          </button>
+        </div>
       </div>
 
       <AdminMessage type={type} message={message || data.error} />
 
-      <AdminSection
-        title="Ringkasan Tim"
-        description="Cek identitas tim, sumber pendaftaran, dan gambaran roster sebelum melakukan perubahan data."
-      >
-        <div className={styles.stack}>
-          <div className={styles.toolbar}>
-            <div>
-              <h4 className={styles.cardTitle}>
-                {team.name}
-                {team.short_name ? ` (${team.short_name})` : ""}
-              </h4>
-              <p className={styles.subtle}>
-                Kapten {team.captain_name} | {team.region}
-                {team.city ? `, ${team.city}` : ""}
-              </p>
-            </div>
-            <StatusPill value={team.status} />
-          </div>
+      <div className={styles.formCard}>
+        <form id="team-update-form" action={updateTeamAction} className={styles.stack}>
+          <input type="hidden" name="team_id" value={team.id} />
+          <input type="hidden" name="tournament_id" value={data.tournament.id} />
+          <input type="hidden" name="return_to" value={returnTo} />
+          <TeamFormFields team={team} />
+        </form>
+      </div>
 
-          <div className={styles.detailsGrid}>
-            <AdminDetailCard label="Roster">
-              <strong>{data.rosterCounts.total_players} pemain</strong>
-             
-            </AdminDetailCard>
-
-            <AdminDetailCard label="Seed / Peringkat">
-             
-              <p className={styles.subtle}>
-                {team.placement
-                  ? `Peringkat ${team.placement}`
-                  : "Belum ada peringkat"}
-              </p>
-            </AdminDetailCard>
-
-            <AdminDetailCard label="Timeline">
-              <strong>{formatDateTime(team.approved_at)}</strong>
-             
-            </AdminDetailCard>
-
-            <AdminDetailCard label="Sumber Pendaftaran">
-              {team.registration_id ? (
-                <Link
-                  href={`/admin/registrations/${team.registration_id}`}
-                  style={{ color: "blue", textDecoration: "underline" }}
-                >
-                  Buka data pendaftaran
-                </Link>
-              ) : (
-                <p className={styles.subtle}>
-                  Tim ini tidak terhubung ke pendaftaran publik.
-                </p>
-              )}
-            </AdminDetailCard>
-          </div>
-        </div>
-      </AdminSection>
-
-      <AdminSection
-      >
-        <div className={styles.stack}>
-          <form id="team-update-form" action={updateTeamAction} className={styles.stack}>
-            <input type="hidden" name="team_id" value={team.id} />
-            <input
-              type="hidden"
-              name="tournament_id"
-              value={data.tournament.id}
-            />
-            <input type="hidden" name="return_to" value={returnTo} />
-            <TeamFormFields team={team} />
-          </form>
-
-          <div className={styles.teamActionRow}>
-            <button type="submit" form="team-update-form" className={styles.buttonPrimary}>
-              Simpan Data Tim
-            </button>
-
-            <form action={deleteTeamAction} className={styles.actionForm}>
-              <input type="hidden" name="team_id" value={team.id} />
-              <input
-                type="hidden"
-                name="tournament_id"
-                value={data.tournament.id}
-              />
-              <button type="submit" className={styles.buttonDanger}>
-                Hapus Tim
-              </button>
-            </form>
-          </div>
-        </div>
-      </AdminSection>
-
-      <AdminSection
-        title="Roster Tim"
-        description="Tabel di bawah untuk scan cepat. Form tambah dan edit pemain dipisah agar halaman tetap ringan."
-      >
+      <AdminSection title="Roster Tim">
         <div className={styles.stack}>
           {data.players.length ? (
             <div className={styles.tableWrap}>

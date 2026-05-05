@@ -10,7 +10,6 @@ function FormGroup({ title, description, children }) {
     <section className={styles.formGroup}>
       <div className={styles.formGroupHeader}>
         <h4 className={styles.formGroupTitle}>{title}</h4>
-        {description ? <p className={styles.formGroupCopy}>{description}</p> : null}
       </div>
       <div className={styles.formGrid}>{children}</div>
     </section>

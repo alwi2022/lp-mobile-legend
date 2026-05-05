@@ -3,7 +3,6 @@ import {
   AdminEmptyState,
   AdminMessage,
   AdminSection,
-  AdminStatCard,
 } from "../../../components/admin/admin-shell";
 import {
   getAdminStreamsPageData,
@@ -20,79 +19,96 @@ function formatDateTime(value) {
   return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
 }
 
+function buildFilterHref(status, query) {
+  const params = new URLSearchParams();
+
+  if (status !== "all") {
+    params.set("status", status);
+  }
+
+  if (query) {
+    params.set("q", query);
+  }
+
+  const qs = params.toString();
+  return qs ? `/admin/streams?${qs}` : "/admin/streams";
+}
+
+function streamMatchesSearch(stream, query) {
+  if (!query) {
+    return true;
+  }
+
+  const haystack = [
+    stream.title,
+    stream.platform,
+    stream.status,
+    stream.match_label,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query.toLowerCase());
+}
+
 export default async function AdminStreamsPage({ searchParams }) {
   const params = await searchParams;
   const type = typeof params?.type === "string" ? params.type : "";
   const message = typeof params?.message === "string" ? params.message : "";
   const activeFilter = normalizeStreamFilter(params?.status);
+  const query = typeof params?.q === "string" ? params.q.trim() : "";
   const data = await getAdminStreamsPageData(activeFilter);
+  const streams = data.streams.filter((stream) => streamMatchesSearch(stream, query));
 
   return (
     <>
       <AdminMessage type={type} message={message || data.error} />
 
-      <AdminSection
-        title="Ringkasan Siaran"
-        description="Panel ini dipakai untuk memantau berapa banyak stream yang aktif, utama, atau sudah selesai."
-      >
-        {data.tournament && data.summary ? (
-          <div className={styles.metaGrid}>
-            <AdminStatCard
-              label="Total Siaran"
-              value={String(data.summary.total_count)}
-              helper={data.tournament.name}
-            />
-            <AdminStatCard
-              label="Utama"
-              value={String(data.summary.featured_count)}
-            />
-            <AdminStatCard
-              label="Live + Segera"
-              value={String(
-                data.summary.live_count + data.summary.live_soon_count,
-              )}
-              helper={`Live ${data.summary.live_count}`}
-            />
-            <AdminStatCard
-              label="Diarsipkan"
-              value={String(data.summary.archived_count)}
-              helper={`Pertandingan terkait ${data.matches.length}`}
-            />
-          </div>
-        ) : (
-          <AdminEmptyState
-            title="Belum ada turnamen aktif"
-            description={
-              <>
-                Halaman siaran membutuhkan turnamen utama. Kalau belum ada, buat
-                dulu dari{" "}
-                <Link href="/admin/settings" className={styles.filterLink}>
-                  Pengaturan
-                </Link>
-                .
-              </>
-            }
-          />
-        )}
-      </AdminSection>
-
-      <AdminSection
-        title="Daftar Siaran"
-        description="Halaman ini dibuat ringkas supaya kamu bisa pilih stream yang ingin dikelola tanpa melihat semua form sekaligus."
-      >
+      <AdminSection>
         <div className={styles.stack}>
-          <div className={styles.toolbar}>
-            <div className={styles.filters} >
-              {STREAM_FILTERS.map((filter) => {
-                const href =
-                  filter.value === "all"
-                    ? "/admin/streams"
-                    : `/admin/streams?status=${encodeURIComponent(filter.value)}`;
+          <div className={styles.crudHeader}>
+            <h1 className={styles.crudTitle}>Siaran</h1>
+            <div className={styles.crudActions}>
+              <form action="/admin/streams" className={styles.crudActions}>
+                {activeFilter !== "all" ? (
+                  <input type="hidden" name="status" value={activeFilter} />
+                ) : null}
+                <input
+                  className={styles.searchInput}
+                  name="q"
+                  defaultValue={query}
+                  placeholder="Cari siaran..."
+                />
+              </form>
+              <Link href="/admin/streams/new" className={styles.buttonPrimary}>
+                + Buat Siaran
+              </Link>
+            </div>
+          </div>
 
+          {!data.tournament ? (
+            <AdminEmptyState
+              title="Belum ada turnamen aktif"
+              description={
+                <>
+                  Buat turnamen aktif dulu dari{" "}
+                  <Link href="/admin/settings" className={styles.filterLink}>
+                    Pengaturan
+                  </Link>
+                  .
+                </>
+              }
+            />
+          ) : null}
+
+          <div className={styles.tableToolbar}>
+            <div className={styles.filters}>
+              {STREAM_FILTERS.map((filter) => {
                 return (
                   <Link
                     key={filter.value}
-                    href={href}
+                    href={buildFilterHref(filter.value, query)}
                     className={[
                       styles.filterLink,
                       activeFilter === filter.value
@@ -106,14 +122,10 @@ export default async function AdminStreamsPage({ searchParams }) {
                   </Link>
                 );
               })}
-
             </div>
-              <Link href="/admin/streams/new"  className={styles.buttonPrimary}>
-                Buat Siaran Baru
-              </Link>
           </div>
 
-          {data.streams.length ? (
+          {streams.length ? (
             <div className={styles.tableWrap}>
               <table className={styles.table}>
                 <thead>
@@ -127,7 +139,7 @@ export default async function AdminStreamsPage({ searchParams }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.streams.map((stream) => (
+                  {streams.map((stream) => (
                     <tr key={stream.id}>
                       <td>
                         <p className={styles.tableTitle}>{stream.title}</p>
@@ -168,7 +180,7 @@ export default async function AdminStreamsPage({ searchParams }) {
           ) : (
             <AdminEmptyState
               title="Belum ada siaran untuk filter ini"
-              description="Buat siaran pertama dulu, lalu kelola link live dan statusnya dari halaman detail."
+              description="Buat siaran baru atau ubah filter pencarian."
             />
           )}
         </div>

@@ -3,7 +3,6 @@ import {
   AdminEmptyState,
   AdminMessage,
   AdminSection,
-  AdminStatCard,
 } from "../../../components/admin/admin-shell";
 import { getAdminBracketPageData } from "../../../lib/admin/bracket";
 import styles from "../../../components/admin/admin-shell.module.css";
@@ -19,10 +18,6 @@ function formatStatus(value = "") {
       cancelled: "Dibatalkan",
     }[value] || String(value).replaceAll("_", " ")
   );
-}
-
-function getRoundMatches(matches, roundNumber) {
-  return matches.filter((match) => match.round_number === roundNumber);
 }
 
 function getAutoLabel(match, side) {
@@ -42,49 +37,24 @@ export default async function AdminBracketPage({ searchParams }) {
   const type = typeof params?.type === "string" ? params.type : "";
   const message = typeof params?.message === "string" ? params.message : "";
   const data = await getAdminBracketPageData();
-  const quarterFinals = getRoundMatches(data.matches, 1);
-  const semiFinals = getRoundMatches(data.matches, 2);
-  const grandFinals = getRoundMatches(data.matches, 3);
-  const isLandingReady =
-    quarterFinals.length === 4 && semiFinals.length === 2 && grandFinals.length === 1;
 
   return (
     <>
       <AdminMessage type={type} message={message || data.error} />
 
-      <AdminSection
-        title="Bracket Landing Page"
-        description="Semua manual. Buat match Quarter Final, Semi Final, dan Grand Final satu per satu, lalu pilih Tim A dan Tim B sendiri."
-      >
-        <div className={styles.metaGrid}>
-          <AdminStatCard label="Quarter Final" value={`${quarterFinals.length}/4`} compact />
-          <AdminStatCard label="Semi Final" value={`${semiFinals.length}/2`} compact />
-          <AdminStatCard label="Grand Final" value={`${grandFinals.length}/1`} compact />
-          <AdminStatCard
-            label="Status Landing"
-            value={isLandingReady ? "Siap" : "Belum"}
-            helper={isLandingReady ? "Bracket akan tampil dari match" : "Lengkapi jumlah match"}
-            compact
-          />
+      <AdminSection>
+        <div className={styles.crudHeader}>
+          <h1 className={styles.crudTitle}>Bracket</h1>
+          <div className={styles.crudActions}>
+            <Link href="/admin/matches/new" className={styles.buttonPrimary}>
+              + Buat Match
+            </Link>
+            <Link href="/bracket" className={styles.filterLink}>
+              Lihat Publik
+            </Link>
+          </div>
         </div>
 
-        <div className={styles.buttonRow}>
-          <Link href="/admin/matches/new" className={styles.buttonPrimary}>
-            Buat Match Manual
-          </Link>
-          <Link href="/admin/matches" className={styles.filterLink}>
-            Kelola Match
-          </Link>
-          <Link href="/bracket" className={styles.filterLink}>
-            Lihat Bracket Publik
-          </Link>
-        </div>
-      </AdminSection>
-
-      <AdminSection
-        title="Isi Bracket"
-        description="Yang tampil di bracket publik adalah match yang ada di tabel ini. Tidak ada auto pemenang dan tidak ada placeholder."
-      >
         {data.matches.length ? (
           <div className={styles.tableWrap}>
             <table className={styles.table}>

@@ -3,7 +3,6 @@ import {
   AdminEmptyState,
   AdminMessage,
   AdminSection,
-  AdminStatCard,
   AdminStatusBadge,
 } from "../../../components/admin/admin-shell";
 import { getAdminTeamsPageData } from "../../../lib/admin/teams";
@@ -25,65 +24,68 @@ function StatusPill({ value }) {
   return <AdminStatusBadge label={config.label} tone={config.tone} />;
 }
 
+function teamMatchesSearch(team, query) {
+  if (!query) {
+    return true;
+  }
+
+  const haystack = [
+    team.name,
+    team.short_name,
+    team.captain_name,
+    team.region,
+    team.city,
+    team.status,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query.toLowerCase());
+}
+
 export default async function AdminTeamsPage({ searchParams }) {
   const params = await searchParams;
   const type = typeof params?.type === "string" ? params.type : "";
   const message = typeof params?.message === "string" ? params.message : "";
+  const query = typeof params?.q === "string" ? params.q.trim() : "";
   const data = await getAdminTeamsPageData();
+  const teams = data.teams.filter((team) => teamMatchesSearch(team, query));
 
   return (
     <>
       <AdminMessage type={type} message={message || data.error} />
 
-      <AdminSection
-        title="Ringkasan Tim"
-        description="Gunakan halaman ini untuk memantau tim final yang sudah siap dipakai di pertandingan dan bracket."
-      >
-        {data.tournament && data.summary ? (
-          <div className={styles.metaGrid}>
-            <AdminStatCard
-              label="Total Tim"
-              value={String(data.summary.total_count)}
-              helper={data.tournament.name}
-            />
-            <AdminStatCard
-              label="Aktif"
-              value={String(data.summary.active_count)}
-              helper={`Unggulan ${data.summary.seeded_count}`}
-            />
-            <AdminStatCard
-              label="Tereliminasi"
-              value={String(data.summary.eliminated_count)}
-              helper={`Juara ${data.summary.champion_count}`}
-            />
-            <AdminStatCard
-              label="Total Roster"
-              value={String(data.summary.roster_count)}
-              helper={`Diarsipkan ${data.summary.archived_count}`}
-            />
-          </div>
-        ) : (
-          <AdminEmptyState
-            title="Belum ada turnamen aktif"
-            description={
-              <>
-                Halaman tim membutuhkan turnamen utama. Kalau belum ada, buat dulu dari{" "}
-                <Link href="/admin/settings" className={styles.filterLink}>
-                  Pengaturan
-                </Link>
-                .
-              </>
-            }
-          />
-        )}
-      </AdminSection>
-
-      <AdminSection
-        title="Daftar Tim Resmi"
-        description="Tim resmi muncul otomatis setelah pendaftaran disetujui. Halaman utama ini sengaja dibuat sederhana, sedangkan edit data dan roster dipindah ke halaman detail."
-      >
+      <AdminSection>
         <div className={styles.stack}>
-          {data.teams.length ? (
+          <div className={styles.crudHeader}>
+            <h1 className={styles.crudTitle}>Tim Resmi</h1>
+            <form action="/admin/teams" className={styles.crudActions}>
+              <input
+                className={styles.searchInput}
+                name="q"
+                defaultValue={query}
+                placeholder="Cari tim..."
+              />
+            </form>
+          </div>
+
+          {!data.tournament ? (
+            <AdminEmptyState
+              title="Belum ada turnamen aktif"
+              description={
+                <>
+                  Buat turnamen aktif dulu dari{" "}
+                  <Link href="/admin/settings" className={styles.filterLink}>
+                    Pengaturan
+                  </Link>
+                  .
+                </>
+              }
+            />
+          ) : null}
+
+          {teams.length ? (
             <div className={styles.tableWrap}>
               <table className={styles.table}>
                 <thead>
@@ -97,7 +99,7 @@ export default async function AdminTeamsPage({ searchParams }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.teams.map((team) => (
+                  {teams.map((team) => (
                     <tr key={team.id}>
                       <td>
                         <p className={styles.tableTitle}>{team.name}</p>
@@ -136,7 +138,7 @@ export default async function AdminTeamsPage({ searchParams }) {
           ) : (
             <AdminEmptyState
               title="Belum ada tim resmi"
-              description="Tim resmi akan muncul setelah pendaftaran publik disetujui dari halaman Pendaftaran."
+              description="Tim resmi akan muncul setelah pendaftaran disetujui atau setelah pencarian dihapus."
             />
           )}
         </div>

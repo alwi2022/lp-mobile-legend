@@ -3,7 +3,6 @@ import {
   AdminEmptyState,
   AdminMessage,
   AdminSection,
-  AdminStatCard,
 } from "../../../components/admin/admin-shell";
 import {
   getAdminMatchesPageData,
@@ -29,70 +28,97 @@ function formatDateTime(value) {
   return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
 }
 
+function buildFilterHref(status, query) {
+  const params = new URLSearchParams();
+
+  if (status !== "all") {
+    params.set("status", status);
+  }
+
+  if (query) {
+    params.set("q", query);
+  }
+
+  const qs = params.toString();
+  return qs ? `/admin/matches?${qs}` : "/admin/matches";
+}
+
+function matchesSearch(match, query) {
+  if (!query) {
+    return true;
+  }
+
+  const haystack = [
+    match.display_name,
+    match.round_name,
+    match.team_a_name,
+    match.team_b_name,
+    match.status,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query.toLowerCase());
+}
+
 export default async function AdminMatchesPage({ searchParams }) {
   const params = await searchParams;
   const type = typeof params?.type === "string" ? params.type : "";
   const message = typeof params?.message === "string" ? params.message : "";
   const activeFilter = normalizeMatchFilter(params?.status);
+  const query = typeof params?.q === "string" ? params.q.trim() : "";
   const data = await getAdminMatchesPageData(activeFilter);
+  const matches = data.matches.filter((match) => matchesSearch(match, query));
 
   return (
     <>
       <AdminMessage type={type} message={message || data.error} />
 
-      <AdminSection
-        title="Pertandingan"
-        description="Pusat kerja utama: buat match, atur jam, pilih tim, lalu input skor."
-      >
-        {data.tournament && data.summary ? (
-          <div className={styles.metaGrid}>
-            <AdminStatCard
-              label="Total Pertandingan"
-              value={String(data.summary.total_count)}
-              helper={data.tournament.name}
-            />
-            <AdminStatCard label="Terjadwal" value={String(data.summary.scheduled_count)} />
-            <AdminStatCard label="Berlangsung" value={String(data.summary.live_count)} />
-            <AdminStatCard
-              label="Selesai"
-              value={String(data.summary.finished_count)}
-              helper={`Game ${data.summary.total_games_count} | Dibatalkan ${data.summary.cancelled_count}`}
-            />
-          </div>
-        ) : (
-          <AdminEmptyState
-            title="Belum ada turnamen aktif"
-            description={
-              <>
-                Halaman pertandingan membutuhkan turnamen utama. Kalau belum ada, buat dulu dari{" "}
-                <Link href="/admin/settings" className={styles.filterLink}>
-                  Pengaturan
-                </Link>
-                .
-              </>
-            }
-          />
-        )}
-      </AdminSection>
-
-      <AdminSection
-        title="Daftar Match"
-        description="Kolom dibuat ringkas supaya mudah dipakai saat hari-H."
-
-      >
+      <AdminSection>
         <div className={styles.stack}>
-          <div className={styles.toolbar}>
+          <div className={styles.crudHeader}>
+            <h1 className={styles.crudTitle}>Jadwal Pertandingan</h1>
+            <div className={styles.crudActions}>
+              <form action="/admin/matches" className={styles.crudActions}>
+                {activeFilter !== "all" ? (
+                  <input type="hidden" name="status" value={activeFilter} />
+                ) : null}
+                <input
+                  className={styles.searchInput}
+                  name="q"
+                  defaultValue={query}
+                  placeholder="Cari match..."
+                />
+              </form>
+              <Link href="/admin/matches/new" className={styles.buttonPrimary}>
+                + Buat Match
+              </Link>
+            </div>
+          </div>
+
+          {!data.tournament ? (
+            <AdminEmptyState
+              title="Belum ada turnamen aktif"
+              description={
+                <>
+                  Buat turnamen aktif dulu dari{" "}
+                  <Link href="/admin/settings" className={styles.filterLink}>
+                    Pengaturan
+                  </Link>
+                  .
+                </>
+              }
+            />
+          ) : null}
+
+          <div className={styles.tableToolbar}>
             <div className={styles.filters}>
               {MATCH_FILTERS.map((filter) => {
-                const href =
-                  filter.value === "all"
-                    ? "/admin/matches"
-                    : `/admin/matches?status=${encodeURIComponent(filter.value)}`;
-
                 return (
                   <Link
                     key={filter.value}
-                    href={href}
+                    href={buildFilterHref(filter.value, query)}
                     className={[
                       styles.filterLink,
                       activeFilter === filter.value ? styles.filterLinkActive : "",
@@ -105,12 +131,9 @@ export default async function AdminMatchesPage({ searchParams }) {
                 );
               })}
             </div>
-             <Link href="/admin/matches/new" className={styles.buttonPrimary}>
-              Buat Pertandingan Baru
-            </Link>
           </div>
 
-          {data.matches.length ? (
+          {matches.length ? (
             <div className={styles.tableWrap}>
               <table className={styles.table}>
                 <thead>
@@ -122,7 +145,7 @@ export default async function AdminMatchesPage({ searchParams }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.matches.map((match) => (
+                  {matches.map((match) => (
                     <tr key={match.id}>
                       <td>
                         <p className={styles.tableTitle}>{match.display_name}</p>
@@ -159,7 +182,7 @@ export default async function AdminMatchesPage({ searchParams }) {
           ) : (
             <AdminEmptyState
               title="Belum ada pertandingan untuk filter ini"
-              description="Buat pertandingan pertama dulu, lalu kelola detail pairing dan skor game dari halaman detail masing-masing."
+              description="Buat match baru atau ubah filter pencarian."
             />
           )}
         </div>
